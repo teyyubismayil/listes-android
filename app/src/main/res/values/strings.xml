@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">Listes</string>
+
+    <string name="goals">Goals</string>
+    <string name="books">Books</string>
+    <string name="movies">Movies</string>
+
+    <string name="add_goal">Add goal</string>
+    <string name="add_book">Add book</string>
+    <string name="add_movie">Add movie</string>
+
+    <string name="achieved">Achieved</string>
+    <string name="readed">Readed</string>
+    <string name="watched">Watched</string>
+
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="add">Add</string>
+
+    <string name="name">Name</string>
+    <string name="details">Details</string>
+
+    <string name="something">Something</string>
+
+    <string name="input_error">Must be not empty</string>
+
+    <string-array name="achieve">
+        <item>To achieve</item>
+        <item>Achieved</item>
+    </string-array>
+
+    <string-array name="read">
+        <item>To read</item>
+        <item>Readed</item>
+    </string-array>
+
+    <string-array name="watch">
+        <item>To watch</item>
+        <item>Watched</item>
+    </string-array>
+
+
+
+
+</resources>
