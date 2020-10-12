@@ -1,4 +1,4 @@
-package com.teyyub.listes
+package com.teyyub.listes.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,15 +7,19 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
+import com.teyyub.listes.R
+import com.teyyub.listes.book
+import com.teyyub.listes.goal
 import com.teyyub.listes.model.Thing
-import com.teyyub.listes.repository.ThingRepository
+import com.teyyub.listes.movie
+import com.teyyub.listes.repository.DatabaseRepository
 
 //Adapter for recycler view
 class ListesRecyclerViewAdapter(private var thingList: List<Thing>) :
     RecyclerView.Adapter<ListesRecyclerViewAdapter.ListesRecyclerViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListesRecyclerViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.card_view, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.listes_card_view, parent, false)
         return ListesRecyclerViewHolder(view)
     }
 
@@ -47,7 +51,7 @@ class ListesRecyclerViewAdapter(private var thingList: List<Thing>) :
             //Delete Thing from database when
             //deleteButton is pressed
             deleteButton.setOnClickListener {
-                ThingRepository.get().deleteThing(thing)
+                DatabaseRepository.get().deleteThing(thing)
             }
         }
 
@@ -70,9 +74,11 @@ class ListesRecyclerViewAdapter(private var thingList: List<Thing>) :
         override fun onClick(v: View?) {
             if (buttonLayout.visibility == View.GONE) {
                 buttonLayout.visibility = View.VISIBLE
+                name.maxLines = Integer.MAX_VALUE
                 details.maxLines = Integer.MAX_VALUE
             } else {
                 buttonLayout.visibility = View.GONE
+                name.maxLines = 1
                 details.maxLines = 1
             }
         }
@@ -96,9 +102,8 @@ class ListesRecyclerViewAdapter(private var thingList: List<Thing>) :
                 //Update this thing in database with isDone property true
                 //if user clicked didButton
                 didButton.setOnClickListener {
-                    val updatedThing = thing
-                    updatedThing.isDone = true
-                    ThingRepository.get().updateThing(thing)
+                    thing.isDone = true
+                    DatabaseRepository.get().updateThing(thing)
                 }
             }
         }

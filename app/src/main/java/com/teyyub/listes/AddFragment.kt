@@ -2,33 +2,33 @@ package com.teyyub.listes
 
 import android.os.Bundle
 import android.text.Editable
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.text.TextWatcher
+import android.view.*
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.LinearLayout
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
-import com.teyyub.listes.model.Thing
-import com.teyyub.listes.repository.ThingRepository
+import com.teyyub.listes.utils.hideKeyboard
+import io.reactivex.Observable
+import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
+import kotlinx.android.synthetic.main.fragment_add.view.*
 
 private const val TAG = "AddFragment"
 
 //DialogFragment for adding Thing to do
 class AddFragment : DialogFragment() {
 
-    private lateinit var cancelButton: MaterialButton
-    private lateinit var addButton: MaterialButton
-    private lateinit var nameEditText: TextInputEditText
-    private lateinit var nameTextInput: TextInputLayout
-    private lateinit var detailsEditText: TextInputEditText
-    private lateinit var detailsTextInput: TextInputLayout
     private lateinit var toolbar: MaterialToolbar
 
     //what property of Thing object which we will add to database
     private lateinit var what: String
+
+    //current hosted fragment
+    private var currentFragment: Fragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,43 +44,17 @@ class AddFragment : DialogFragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_add, container, false)
 
-        cancelButton = view.findViewById(R.id.cancel_button)
-        addButton = view.findViewById(R.id.add_button)
-        nameEditText = view.findViewById(R.id.name_edit_text)
-        nameTextInput = view.findViewById(R.id.name_text_input)
-        detailsEditText = view.findViewById(R.id.details_edit_text)
-        detailsTextInput = view.findViewById(R.id.details_text_input)
-        toolbar = view.findViewById(R.id.toolbar)
-
-        configureToolbar()
-
-        addButton.setOnClickListener {
-            if (!isNameValid(nameEditText.text!!)) {
-                //Showing error message is written name is not valid
-                nameTextInput.error = resources.getString(R.string.input_error)
-            } else {
-                //Clear the error
-                nameTextInput.error = null
-                //Adding new Thing object to database
-                addThing(nameEditText.text.toString(), detailsEditText.text.toString())
-                //Closing this dialog fragment
-                dismiss()
-            }
+        //hosting fragment
+        currentFragment = childFragmentManager.findFragmentById(R.id.fragment_container)
+        if (currentFragment == null) {
+            hostFragment(AddManualFragment.newInstance(what))
         }
 
-        cancelButton.setOnClickListener {
-            //Closing this dialog fragment if clicked cancel
-            dismiss()
-        }
-
-        // Clear the error if name is valid
-        nameEditText.setOnKeyListener { _, _, _ ->
-            if (isNameValid(nameEditText.text!!)) {
-                // Clear the error.
-                nameTextInput.error = null
-                Log.i("Teyyubc", "a")
-            }
-            false
+        //If Thing is goal there is no search
+        toolbar = view.toolbar
+        if (what == goal) {
+            toolbar.findViewById<LinearLayout>(R.id.search_bar).visibility = View.GONE
+            toolbar.title = getString(R.string.add_goal)
         }
 
         return view
@@ -91,34 +65,101 @@ class AddFragment : DialogFragment() {
         return R.style.DialogTheme
     }
 
-    //Checking if name written by user is valid
-    private fun isNameValid(text: Editable?): Boolean {
-        return text != null && text.length > 0
+    override fun onStart() {
+        super.onStart()
+
+        //listeners for search bar
+        if (what != goal) {
+            configureListeners()
+        }
     }
 
-    //Adding new Thing object to database
-    private fun addThing(name: String, details: String) {
-        val newThing = Thing(what, name, details, false)
-        ThingRepository.get().addThing(newThing)
+    private fun hostFragment(fragment: Fragment) {
+        currentFragment = fragment
+
+        childFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container, currentFragment!!)
+            .commit()
     }
 
-    private fun configureToolbar() {
-        //Setting title for toolbar
-        //depending on passed what value
-        toolbar.title = resources.getString(
-            when (what) {
-                goal -> R.string.add_goal
-                book -> R.string.add_book
-                movie -> R.string.add_movie
-                else -> R.string.something
+    private fun configureListeners() {
+        val clearIcon = toolbar.findViewById<ImageButton>(R.id.clear_icon)
+        val findEditText = toolbar.findViewById<EditText>(R.id.find_edittext)
+        val findBackIcon = toolbar.findViewById<ImageButton>(R.id.find_back_icon)
+
+        //Back button which clears focus of editText
+        findBackIcon.setOnClickListener {
+            if (findEditText.isFocused) {
+                findEditText.clearFocus()
+                findEditText.text.clear()
+                hideKeyboard()
+            } else {
+                findEditText.requestFocus()
             }
-        )
-        toolbar.setNavigationOnClickListener {
-            dismiss()
+        }
+
+        //button which clears editText
+        clearIcon.setOnClickListener {
+            findEditText.text.clear()
+            //show populars
+            showPopularsSubject.onNext(Unit)
+        }
+
+        //changing icon and replacing fragment
+        //depending on editText is focused
+        findEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                findBackIcon.setImageResource(R.drawable.ic_back)
+                //open list
+                hostFragment(AddSearchFragment.newInstance(what))
+                showPopularsSubject.onNext(Unit)
+            } else {
+                findBackIcon.setImageResource(R.drawable.ic_search)
+                hostFragment(AddManualFragment.newInstance(what))
+            }
+        }
+
+        //showing and hiding clear button
+        findEditText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if (s.isNullOrEmpty()) {
+                    clearIcon.visibility = View.GONE
+                } else {
+                    clearIcon.visibility = View.VISIBLE
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+        //When search button from keyboard was clicked
+        findEditText.setOnEditorActionListener { editText, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                hideKeyboard()
+                //Doing search
+                queryTextSubject.onNext(editText.text.toString())
+            }
+            true
         }
     }
 
     companion object {
+        //Subject in which we will pass queries of user
+        private val queryTextSubject: PublishSubject<String> = PublishSubject.create()
+
+        //Observable for exposing query subject
+        val queryStream: Observable<String>
+            get() = queryTextSubject.hide()
+
+        //Show which will emit when need to show populars list
+        private val showPopularsSubject: BehaviorSubject<Unit> = BehaviorSubject.create()
+
+        //Observable for exposing show populars subject
+        val showPopularsStream: Observable<Unit>
+            get() = showPopularsSubject.hide()
+
         //Static method for creating an instance of AddFragment
         //and putting passed arguments in fragment arguments bundle
         fun newInstance(what: String): AddFragment {

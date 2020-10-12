@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 //Model for goal, book, or movie
 @Entity
-class Thing (
+data class Thing (
     var what: String, //is book, movie or goal
     var name: String,
     var details: String, //additional information

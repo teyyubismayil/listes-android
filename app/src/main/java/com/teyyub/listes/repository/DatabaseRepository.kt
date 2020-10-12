@@ -11,7 +11,7 @@ import java.util.concurrent.Executors
 private const val DATABASE_NAME = "thing-database"
 
 //Repository for working with database. It is singleton so constructor is private
-class ThingRepository private constructor(context: Context){
+class DatabaseRepository private constructor(context: Context) {
 
     //ThingDatabase implementation
     private val database: Thingdatabase = Room.databaseBuilder(
@@ -27,7 +27,8 @@ class ThingRepository private constructor(context: Context){
     private val executor = Executors.newSingleThreadExecutor()
 
     //functions for working with database
-    fun getThings(what: String, isDone: Boolean): LiveData<List<Thing>> = thingDao.getThings(what, isDone)
+    fun getThings(what: String, isDone: Boolean): LiveData<List<Thing>> =
+        thingDao.getThings(what, isDone)
 
     fun getAllThings(): LiveData<List<Thing>> = thingDao.getAllThings()
 
@@ -55,21 +56,20 @@ class ThingRepository private constructor(context: Context){
         }
     }
 
-    companion object{
+    companion object {
         //ThingRepository is singleton
-        private var INSTANCE: ThingRepository? = null
+        private var INSTANCE: DatabaseRepository? = null
 
         //it is initialized in application's onCreate() function
         fun initialize(context: Context) {
-            if(INSTANCE == null) {
-                INSTANCE = ThingRepository(context)
+            if (INSTANCE == null) {
+                INSTANCE = DatabaseRepository(context)
             }
         }
 
         //for getting the instance of ThingRepository
-        fun get(): ThingRepository {
-            return INSTANCE ?:
-            throw IllegalStateException("CrimeRepository must be initialized")
+        fun get(): DatabaseRepository {
+            return INSTANCE ?: throw IllegalStateException("CrimeRepository must be initialized")
         }
     }
 }

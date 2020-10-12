@@ -7,10 +7,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.teyyub.listes.adapters.ListesRecyclerViewAdapter
 import com.teyyub.listes.model.Thing
-import com.teyyub.listes.repository.ThingRepository
+import com.teyyub.listes.repository.DatabaseRepository
+import kotlinx.android.synthetic.main.fragment_things_list.view.*
 
 private const val WHATTAG = "thing-what"
 private const val ISDONETAG = "thing-isdone"
@@ -18,15 +18,13 @@ private const val ISDONETAG = "thing-isdone"
 //Fragment which shows list of things
 class ThingsListFragment : Fragment() {
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var floatButton: FloatingActionButton
-
     //Adapter for recyclerView
     //First we pass emptyList until we get list of Things from LiveData
-    private var adapter: ListesRecyclerViewAdapter? = ListesRecyclerViewAdapter(emptyList())
+    private var adapter: ListesRecyclerViewAdapter? =
+        ListesRecyclerViewAdapter(emptyList())
 
     //what and isDone properties of Thing objects to show
-    //they are passed to newInstance(..) function
+    //They are passed to newInstance(..) function
     // and stored in fragment's arguments bundle
     private lateinit var what: String
     private var isDone: Boolean = false
@@ -44,25 +42,22 @@ class ThingsListFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_things_listes, container, false)
-
-        floatButton = view.findViewById(R.id.floating_action_button)
-        recyclerView = view.findViewById(R.id.recycler_view)
+        val view = inflater.inflate(R.layout.fragment_things_list, container, false)
 
         //We show floatButton if this fragment shows list
         // of things to do(isDone is false)
         if (isDone) {
-            floatButton.hide()
+            view.add_fab.hide()
         } else {
-            floatButton.setOnClickListener {
+            view.add_fab.setOnClickListener {
                 //Show full screen dialog for adding Thing to do
                 AddFragment.newInstance(what).show(parentFragmentManager, null)
             }
         }
 
         //Configuring recyclerView
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = adapter
+        view.recycler_view.layoutManager = LinearLayoutManager(context)
+        view.recycler_view.adapter = adapter
 
         return view
     }
@@ -73,7 +68,7 @@ class ThingsListFragment : Fragment() {
         //Getting list of Thing objects from database
         //We scope lifetime of Observer to lifetime
         // of lifecycle of fragment view
-        ThingRepository.get().getThings(what, isDone).observe(
+        DatabaseRepository.get().getThings(what, isDone).observe(
             viewLifecycleOwner,
             Observer { things ->
                 things?.let {
@@ -87,7 +82,7 @@ class ThingsListFragment : Fragment() {
 
     private fun updateAdapter(list: List<Thing>) {
         adapter = ListesRecyclerViewAdapter(list)
-        recyclerView.adapter = adapter
+        requireView().recycler_view.adapter = adapter
     }
 
     companion object {

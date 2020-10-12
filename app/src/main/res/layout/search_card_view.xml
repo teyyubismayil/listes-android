@@ -21,7 +21,8 @@
             android:layout_height="wrap_content"
             android:padding="2dp"
             android:text="@string/name"
-            android:textAppearance="?attr/textAppearanceHeadline6" />
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            android:maxLines="1"/>
 
         <TextView
             android:id="@+id/details"
@@ -37,23 +38,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="end"
-            android:orientation="horizontal"
-            android:visibility="gone">
+            android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/delete_button"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp"
-                android:text="@string/delete" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/did_button"
+                android:id="@+id/add_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:backgroundTint="?attr/colorPrimary"
-                android:text="did" />
+                android:text="@string/add" />
 
         </LinearLayout>
 

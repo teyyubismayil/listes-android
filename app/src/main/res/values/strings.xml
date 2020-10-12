@@ -23,6 +23,13 @@
     <string name="something">Something</string>
 
     <string name="input_error">Must be not empty</string>
+    <string name="add_manually">ADD MANUALLY</string>
+    <string name="added">Added</string>
+    <string name="popular_movies">Popular Movies</string>
+    <string name="popular_books">Popular Books</string>
+    <string name="nothing_found">Nothing found</string>
+    <string name="results">Results</string>
+    <string name="something_went_wrong">Something went wrong</string>
 
     <string-array name="achieve">
         <item>To achieve</item>

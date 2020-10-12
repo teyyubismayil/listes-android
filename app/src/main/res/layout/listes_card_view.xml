@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="8dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginRight="8dp"
+    app:cardCornerRadius="4dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="@string/name"
+            android:maxLines="1"
+            android:textAppearance="?attr/textAppearanceHeadline6" />
+
+        <TextView
+            android:id="@+id/details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="@string/details"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:maxLines="1"/>
+
+        <LinearLayout
+            android:id="@+id/buttons_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/delete_button"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                android:text="@string/delete" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/did_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="?attr/colorPrimary"
+                android:text="did" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
