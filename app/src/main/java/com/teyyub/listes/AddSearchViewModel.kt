@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.teyyub.listes.model.Thing
 import com.teyyub.listes.repository.NetworkRepository
 import com.teyyub.listes.repository.NetworkResult
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
@@ -45,18 +46,29 @@ class AddSearchViewModel(
         get() = _loadingLiveData
 
     init {
-        //We cache getPopulars result to use it later
-        val populars = NetworkRepository.getPopulars(what)
-            .cache()
-
         //We listen to showPopularsStream of AddFragment
         //When it emits we retrieve populars and post result to fragment
+        //We check if we have cached populars
+        //If not we fetch from network and save it in cache
         showPopularsStream
             .flatMapSingle {
-                populars
-                    .doOnSubscribe { _loadingLiveData.postValue(true) }
-                    .doOnEvent { _, _ -> _loadingLiveData.postValue(false) }
-                    .subscribeOn(Schedulers.io())
+                if (popularsCache[what]?.things.isNullOrEmpty()) {
+                    //We use _loadingLiveData to show and hide loading indicator
+                    NetworkRepository.getPopulars(what)
+                        .doOnSubscribe { _loadingLiveData.postValue(true) }
+                        .doOnEvent { _, _ -> _loadingLiveData.postValue(false) }
+                        .doOnSuccess {
+                            //Saving in cache
+                            if (it is NetworkResult.Success) {
+                                popularsCache[what] = it
+                            }
+                        }
+                        .subscribeOn(Schedulers.io())
+                } else {
+                    //Returning cached result
+                    Observable.just(popularsCache[what])
+                        .firstOrError()
+                }
             }
             .doOnNext {
                 if (it is NetworkResult.Failure) {
@@ -115,5 +127,14 @@ class AddSearchViewModel(
         super.onCleared()
         //Disposing subscriptions
         disposables.dispose()
+    }
+
+    companion object {
+        //Here we will cache populars result to use during app lifecycle
+        //So we will fetch popular books and popular movies once during app lifecycle
+        private val popularsCache = mutableMapOf(
+            Pair(movie, NetworkResult.Success(emptyList())),
+            Pair(book, NetworkResult.Success(emptyList()))
+        )
     }
 }

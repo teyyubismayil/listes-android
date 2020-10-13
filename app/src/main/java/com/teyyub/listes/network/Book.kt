@@ -7,13 +7,11 @@ class Book (private val title: String, private val authors: List<String>?, priva
 
     fun toThing(): Thing {
 
-        var details: String
-
-        if (!authors.isNullOrEmpty()) {
+        val details = if (!authors.isNullOrEmpty()) {
             val authorsString = authors.toString().let { it.substring(1, it.length - 1) }
-            details = "$authorsString\n${description ?: ""}"
+            "$authorsString\n${description ?: ""}"
         } else {
-            details = description ?: ""
+            description ?: ""
         }
 
         return Thing(book, title, details, false)
