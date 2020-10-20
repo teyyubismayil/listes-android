@@ -9,9 +9,9 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.Fragment
 import com.google.android.material.appbar.MaterialToolbar
 import com.teyyub.listes.utils.hideKeyboard
+import com.teyyub.listes.utils.hostFragment
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
@@ -22,13 +22,24 @@ private const val TAG = "AddFragment"
 //DialogFragment for adding Thing to do
 class AddFragment : DialogFragment() {
 
-    private lateinit var toolbar: MaterialToolbar
+    //Subject in which we will pass queries of user
+    private val searchTextSubject: PublishSubject<String> = PublishSubject.create()
+
+    //Observable for exposing query subject
+    val searchStream: Observable<String>
+        get() = searchTextSubject.hide()
+
+    //Show which will emit when need to show populars list
+    private val showPopularsSubject: BehaviorSubject<Unit> = BehaviorSubject.create()
+
+    //Observable for exposing show populars subject
+    val showPopularsStream: Observable<Unit>
+        get() = showPopularsSubject.hide()
 
     //what property of Thing object which we will add to database
     private lateinit var what: String
 
-    //current hosted fragment
-    private var currentFragment: Fragment? = null
+    private lateinit var toolbar: MaterialToolbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,9 +56,8 @@ class AddFragment : DialogFragment() {
         val view = inflater.inflate(R.layout.fragment_add, container, false)
 
         //hosting fragment
-        currentFragment = childFragmentManager.findFragmentById(R.id.fragment_container)
-        if (currentFragment == null) {
-            hostFragment(AddManualFragment.newInstance(what))
+        if (savedInstanceState == null) {
+            hostFragment(R.id.fragment_container, AddManualFragment.newInstance(what))
         }
 
         //If Thing is goal there is no search
@@ -70,20 +80,11 @@ class AddFragment : DialogFragment() {
 
         //listeners for search bar
         if (what != goal) {
-            configureListeners()
+            configureSearchBarListeners()
         }
     }
 
-    private fun hostFragment(fragment: Fragment) {
-        currentFragment = fragment
-
-        childFragmentManager
-            .beginTransaction()
-            .replace(R.id.fragment_container, currentFragment!!)
-            .commit()
-    }
-
-    private fun configureListeners() {
+    private fun configureSearchBarListeners() {
         val clearIcon = toolbar.findViewById<ImageButton>(R.id.clear_icon)
         val findEditText = toolbar.findViewById<EditText>(R.id.find_edittext)
         val findBackIcon = toolbar.findViewById<ImageButton>(R.id.find_back_icon)
@@ -112,11 +113,11 @@ class AddFragment : DialogFragment() {
             if (hasFocus) {
                 findBackIcon.setImageResource(R.drawable.ic_back)
                 //open list
-                hostFragment(AddSearchFragment.newInstance(what))
+                hostFragment(R.id.fragment_container, AddSearchFragment.newInstance(what))
                 showPopularsSubject.onNext(Unit)
             } else {
                 findBackIcon.setImageResource(R.drawable.ic_search)
-                hostFragment(AddManualFragment.newInstance(what))
+                hostFragment(R.id.fragment_container, AddManualFragment.newInstance(what))
             }
         }
 
@@ -139,27 +140,13 @@ class AddFragment : DialogFragment() {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 hideKeyboard()
                 //Doing search
-                queryTextSubject.onNext(editText.text.toString())
+                searchTextSubject.onNext(editText.text.toString())
             }
             true
         }
     }
 
     companion object {
-        //Subject in which we will pass queries of user
-        private val queryTextSubject: PublishSubject<String> = PublishSubject.create()
-
-        //Observable for exposing query subject
-        val queryStream: Observable<String>
-            get() = queryTextSubject.hide()
-
-        //Show which will emit when need to show populars list
-        private val showPopularsSubject: BehaviorSubject<Unit> = BehaviorSubject.create()
-
-        //Observable for exposing show populars subject
-        val showPopularsStream: Observable<Unit>
-            get() = showPopularsSubject.hide()
-
         //Static method for creating an instance of AddFragment
         //and putting passed arguments in fragment arguments bundle
         fun newInstance(what: String): AddFragment {

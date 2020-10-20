@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.teyyub.listes.model.Thing
+import com.teyyub.listes.repository.DatabaseRepository
 import com.teyyub.listes.repository.NetworkRepository
 import com.teyyub.listes.repository.NetworkResult
 import io.reactivex.Observable
@@ -14,11 +15,10 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 
 class AddSearchViewModel(
-    what: String
+    what: String,
+    searchStream: Observable<String>,
+    showPopularsStream: Observable<Unit>
 ) : ViewModel() {
-
-    private val searchStream = AddFragment.queryStream
-    private val showPopularsStream = AddFragment.showPopularsStream
 
     private val disposables = CompositeDisposable()
 
@@ -121,6 +121,10 @@ class AddSearchViewModel(
                 }
             )
             .addTo(disposables)
+    }
+
+    fun addThing(thing: Thing) {
+        DatabaseRepository.get().addThing(thing)
     }
 
     override fun onCleared() {

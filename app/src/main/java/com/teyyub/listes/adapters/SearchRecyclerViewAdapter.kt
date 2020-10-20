@@ -8,14 +8,16 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.teyyub.listes.R
 import com.teyyub.listes.model.Thing
-import com.teyyub.listes.repository.DatabaseRepository
 
 //Adapter for recycler view
 class SearchRecyclerViewAdapter(private var thingList: List<Thing>) :
     RecyclerView.Adapter<SearchRecyclerViewAdapter.SearchRecyclerViewHolder>() {
 
+    private lateinit var listener: Listener
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchRecyclerViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.search_card_view, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.search_card_view, parent, false)
         return SearchRecyclerViewHolder(view)
     }
 
@@ -26,8 +28,17 @@ class SearchRecyclerViewAdapter(private var thingList: List<Thing>) :
         holder.bind(thingList[position])
     }
 
+    fun setListener(listener: Listener) {
+        this.listener = listener
+    }
+
+    interface Listener {
+        fun onAddButtonClicked(thing: Thing)
+    }
+
     //ViewHolder for recycler view
-    class SearchRecyclerViewHolder(private val cardView: View) : RecyclerView.ViewHolder(cardView),
+    inner class SearchRecyclerViewHolder(private val cardView: View) :
+        RecyclerView.ViewHolder(cardView),
         View.OnClickListener {
 
         private val name: TextView = cardView.findViewById(R.id.name)
@@ -40,12 +51,6 @@ class SearchRecyclerViewAdapter(private var thingList: List<Thing>) :
         init {
             //Setting listener for cardView
             cardView.setOnClickListener(this)
-            //Add Thing from database when
-            addButton.setOnClickListener {
-                it.isEnabled = false
-                (it as Button).text = cardView.resources.getString(R.string.added)
-                DatabaseRepository.get().addThing(thing)
-            }
         }
 
         //function for binding this ViewHolder
@@ -54,6 +59,13 @@ class SearchRecyclerViewAdapter(private var thingList: List<Thing>) :
 
             name.text = thing.name
             details.text = thing.details
+
+            //Add Thing from database when
+            addButton.setOnClickListener {
+                it.isEnabled = false
+                (it as Button).text = cardView.resources.getString(R.string.added)
+                listener.onAddButtonClicked(thing)
+            }
         }
 
         //Showing and hiding buttons if cardView is clicked
@@ -66,6 +78,5 @@ class SearchRecyclerViewAdapter(private var thingList: List<Thing>) :
                 details.maxLines = 1
             }
         }
-
     }
 }

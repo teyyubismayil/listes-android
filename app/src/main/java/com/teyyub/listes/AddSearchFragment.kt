@@ -34,7 +34,11 @@ class AddSearchFragment : Fragment() {
             this,
             object : ViewModelProvider.NewInstanceFactory() {
                 override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                    return AddSearchViewModel(what) as T
+                    return AddSearchViewModel(
+                        what,
+                        (parentFragment as AddFragment).searchStream,
+                        (parentFragment as AddFragment).showPopularsStream
+                    ) as T
                 }
             }
         ).get(AddSearchViewModel::class.java)
@@ -111,6 +115,11 @@ class AddSearchFragment : Fragment() {
 
     private fun updateAdapter(things: List<Thing>) {
         adapter = SearchRecyclerViewAdapter(things)
+        adapter.setListener(object : SearchRecyclerViewAdapter.Listener {
+            override fun onAddButtonClicked(thing: Thing) {
+                viewModel.addThing(thing)
+            }
+        })
         requireView().recycler_view.adapter = adapter
     }
 
