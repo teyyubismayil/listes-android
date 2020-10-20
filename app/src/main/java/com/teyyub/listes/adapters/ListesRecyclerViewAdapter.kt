@@ -12,14 +12,16 @@ import com.teyyub.listes.book
 import com.teyyub.listes.goal
 import com.teyyub.listes.model.Thing
 import com.teyyub.listes.movie
-import com.teyyub.listes.repository.DatabaseRepository
 
 //Adapter for recycler view
 class ListesRecyclerViewAdapter(private var thingList: List<Thing>) :
     RecyclerView.Adapter<ListesRecyclerViewAdapter.ListesRecyclerViewHolder>() {
 
+    private lateinit var listener: Listener
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListesRecyclerViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.listes_card_view, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.listes_card_view, parent, false)
         return ListesRecyclerViewHolder(view)
     }
 
@@ -30,8 +32,19 @@ class ListesRecyclerViewAdapter(private var thingList: List<Thing>) :
         holder.bind(thingList[position])
     }
 
+    fun setListener(listener: Listener) {
+        this.listener = listener
+    }
+
+    //Listener for clicks which Activity or Fragment will implement
+    interface Listener {
+        fun onDidButtonClick(thing: Thing)
+        fun onDeleteButtonClick(thing: Thing)
+    }
+
     //ViewHolder for recycler view
-    class ListesRecyclerViewHolder(private val cardView: View) : RecyclerView.ViewHolder(cardView),
+    inner class ListesRecyclerViewHolder(private val cardView: View) :
+        RecyclerView.ViewHolder(cardView),
         View.OnClickListener {
 
         private val name: TextView = cardView.findViewById(R.id.name)
@@ -48,17 +61,18 @@ class ListesRecyclerViewAdapter(private var thingList: List<Thing>) :
         init {
             //Setting listener for cardView
             cardView.setOnClickListener(this)
-            //Delete Thing from database when
-            //deleteButton is pressed
-            deleteButton.setOnClickListener {
-                DatabaseRepository.get().deleteThing(thing)
-            }
         }
 
         //function for binding this ViewHolder
         fun bind(thing: Thing) {
             this.thing = thing
 
+            configureTextViews()
+            configureDidButton()
+            configureDeleteButton()
+        }
+
+        private fun configureTextViews() {
             name.text = thing.name
 
             if (thing.details.isEmpty()) {
@@ -66,8 +80,37 @@ class ListesRecyclerViewAdapter(private var thingList: List<Thing>) :
             } else {
                 details.text = thing.details
             }
+        }
 
-            configureDidButton()
+        private fun configureDidButton() {
+            if (this.thing.isDone) {
+                //Hiding didButton if this thing is done(isDone is true)
+                didButton.visibility = View.GONE
+            } else {
+                //Setting text for didButton text
+                //depending on what value of thing object
+                didButton.text = cardView.resources.getString(
+                    when (thing.what) {
+                        goal -> R.string.achieved
+                        book -> R.string.readed
+                        movie -> R.string.watched
+                        else -> R.string.something
+                    }
+                )
+                //Update this thing in database with isDone property true
+                //if user clicked didButton
+                didButton.setOnClickListener {
+                    listener.onDidButtonClick(thing)
+                }
+            }
+        }
+
+        private fun configureDeleteButton() {
+            //Delete Thing from database when
+            //deleteButton is pressed
+            deleteButton.setOnClickListener {
+                listener.onDeleteButtonClick(thing)
+            }
         }
 
         //Showing and hiding buttons if cardView is clicked
@@ -80,31 +123,6 @@ class ListesRecyclerViewAdapter(private var thingList: List<Thing>) :
                 buttonLayout.visibility = View.GONE
                 name.maxLines = 1
                 details.maxLines = 1
-            }
-        }
-
-        private fun configureDidButton() {
-            //Setting text for didButton text
-            //depending on what value of thing object
-            didButton.text = cardView.resources.getString(
-                when (thing.what) {
-                    goal -> R.string.achieved
-                    book -> R.string.readed
-                    movie -> R.string.watched
-                    else -> R.string.something
-                }
-            )
-
-            if (this.thing.isDone) {
-                //Hiding didButton if this thing is done(isDone is true)
-                didButton.visibility = View.GONE
-            } else {
-                //Update this thing in database with isDone property true
-                //if user clicked didButton
-                didButton.setOnClickListener {
-                    thing.isDone = true
-                    DatabaseRepository.get().updateThing(thing)
-                }
             }
         }
     }
