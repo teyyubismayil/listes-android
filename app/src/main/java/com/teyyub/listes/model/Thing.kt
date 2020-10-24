@@ -13,4 +13,11 @@ data class Thing (
 ) {
     @PrimaryKey(autoGenerate = true)
     var thingId: Int = 0 //id of thing
+
+    companion object {
+        //Possible 'what' property values of Thing object
+        const val THING_GOAL = "Goal"
+        const val THING_BOOK = "Book"
+        const val THING_MOVIE = "Movie"
+    }
 }

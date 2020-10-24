@@ -1,19 +1,16 @@
 package com.teyyub.listes
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
+import com.teyyub.listes.model.Thing
 import kotlinx.android.synthetic.main.activity_main.*
 
-//Possible 'what' property values of Thing object
-const val goal = "Goal"
-const val book = "Book"
-const val movie = "Movie"
-
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ThingsListFragment.Listener {
 
     //titles of tabs of tabLayout
     private lateinit var tabTitles: List<String>
@@ -49,17 +46,17 @@ class MainActivity : AppCompatActivity() {
             //Handling item selection
             when (item.itemId) {
                 R.id.goals_item -> {
-                    what = goal
+                    what = Thing.THING_GOAL
                     selectNavigationItem()
                     true
                 }
                 R.id.books_item -> {
-                    what = book
+                    what = Thing.THING_BOOK
                     selectNavigationItem()
                     true
                 }
                 R.id.movies_item -> {
-                    what = movie
+                    what = Thing.THING_MOVIE
                     selectNavigationItem()
                     true
                 }
@@ -75,9 +72,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun configureToolbar() {
         toolbar.title = when (what) {
-            goal -> resources.getString(R.string.goals)
-            movie -> resources.getString(R.string.movies)
-            book -> resources.getString(R.string.books)
+            Thing.THING_GOAL -> resources.getString(R.string.goals)
+            Thing.THING_MOVIE -> resources.getString(R.string.movies)
+            Thing.THING_BOOK -> resources.getString(R.string.books)
             else -> throw IllegalArgumentException()
         }
     }
@@ -104,20 +101,29 @@ class MainActivity : AppCompatActivity() {
 
             override fun createFragment(position: Int): Fragment {
                 return when (position) {
-                    0 -> ThingsListFragment.newInstance(what, false)
-                    1 -> ThingsListFragment.newInstance(what, true)
+                    0 -> ThingsListFragment.newInstance(what, false).apply { setListener(this@MainActivity) }
+                    1 -> ThingsListFragment.newInstance(what, true).apply { setListener(this@MainActivity) }
                     else -> throw IllegalArgumentException()
                 }
             }
         }
     }
 
+    //From ThingsListFragment.Listener
+    //Called when add button clicked in ThingsListFragment
+    override fun onAddButtonClick() {
+        val intent = Intent(this, AddActivity::class.java).apply {
+            putExtra(AddActivity.THING_WHAT, what)
+        }
+        startActivity(intent)
+    }
+
     private fun initializeTabTitles() {
         //Initializing list for titles of tab depending on selected bottomNavigationView item
         tabTitles = when (what) {
-            goal -> resources.getStringArray(R.array.achieve).toList()
-            book -> resources.getStringArray(R.array.read).toList()
-            movie -> resources.getStringArray(R.array.watch).toList()
+            Thing.THING_GOAL -> resources.getStringArray(R.array.achieve).toList()
+            Thing.THING_BOOK -> resources.getStringArray(R.array.read).toList()
+            Thing.THING_MOVIE -> resources.getStringArray(R.array.watch).toList()
             else -> throw IllegalArgumentException()
         }
     }

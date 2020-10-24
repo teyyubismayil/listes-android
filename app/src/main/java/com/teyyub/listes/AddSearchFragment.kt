@@ -4,11 +4,11 @@ import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.teyyub.listes.adapters.SearchRecyclerViewAdapter
 import com.teyyub.listes.model.Thing
+import com.teyyub.listes.utils.viewModelFactory
 import kotlinx.android.synthetic.main.fragment_add_search.view.*
 
 private const val TAG = "SearchFragment"
@@ -18,7 +18,7 @@ class AddSearchFragment : Fragment() {
     //what property of Thing object which we will search for
     private lateinit var what: String
 
-    private lateinit var viewModel: AddSearchViewModel
+    private lateinit var viewModel: AddViewModel
 
     private var adapter: SearchRecyclerViewAdapter =
         SearchRecyclerViewAdapter(emptyList())
@@ -31,17 +31,9 @@ class AddSearchFragment : Fragment() {
 
         //viewModel
         viewModel = ViewModelProvider(
-            this,
-            object : ViewModelProvider.NewInstanceFactory() {
-                override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                    return AddSearchViewModel(
-                        what,
-                        (parentFragment as AddFragment).searchStream,
-                        (parentFragment as AddFragment).showPopularsStream
-                    ) as T
-                }
-            }
-        ).get(AddSearchViewModel::class.java)
+            requireActivity(),
+            viewModelFactory { AddViewModel(what) }
+        ).get(AddViewModel::class.java)
     }
 
     override fun onCreateView(
@@ -64,7 +56,7 @@ class AddSearchFragment : Fragment() {
         viewModel.popularsLiveData.observe(
             viewLifecycleOwner,
             Observer { things ->
-                if (what == movie) {
+                if (what == Thing.THING_MOVIE) {
                     view.heading_text.text = getString(R.string.popular_movies)
                 } else {
                     view.heading_text.text = getString(R.string.popular_books)
@@ -109,7 +101,8 @@ class AddSearchFragment : Fragment() {
         super.onStart()
 
         requireView().done_fab.setOnClickListener {
-            (parentFragment as AddFragment).dismiss()
+            //Closing AddActivity
+            requireActivity().finish()
         }
     }
 

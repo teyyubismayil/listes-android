@@ -1,7 +1,6 @@
 package com.teyyub.listes.network
 
 import com.teyyub.listes.model.Thing
-import com.teyyub.listes.movie
 
 data class Movie(val title: String, val overview: String?, val release_date: String?){
 
@@ -13,6 +12,6 @@ data class Movie(val title: String, val overview: String?, val release_date: Str
         } else {
             overview ?: ""
         }
-        return Thing(movie, title, details, false)
+        return Thing(Thing.THING_MOVIE, title, details, false)
     }
 }

@@ -8,10 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.teyyub.listes.R
-import com.teyyub.listes.book
-import com.teyyub.listes.goal
 import com.teyyub.listes.model.Thing
-import com.teyyub.listes.movie
 
 //Adapter for recycler view
 class ListesRecyclerViewAdapter(private var thingList: List<Thing>) :
@@ -91,9 +88,9 @@ class ListesRecyclerViewAdapter(private var thingList: List<Thing>) :
                 //depending on what value of thing object
                 didButton.text = cardView.resources.getString(
                     when (thing.what) {
-                        goal -> R.string.achieved
-                        book -> R.string.readed
-                        movie -> R.string.watched
+                        Thing.THING_GOAL -> R.string.achieved
+                        Thing.THING_BOOK -> R.string.readed
+                        Thing.THING_MOVIE -> R.string.watched
                         else -> R.string.something
                     }
                 )

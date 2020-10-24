@@ -1,6 +1,5 @@
 package com.teyyub.listes.network
 
-import com.teyyub.listes.book
 import com.teyyub.listes.model.Thing
 
 class Book (private val title: String, private val authors: List<String>?, private val description: String? ) {
@@ -14,6 +13,6 @@ class Book (private val title: String, private val authors: List<String>?, priva
             description ?: ""
         }
 
-        return Thing(book, title, details, false)
+        return Thing(Thing.THING_BOOK, title, details, false)
     }
 }

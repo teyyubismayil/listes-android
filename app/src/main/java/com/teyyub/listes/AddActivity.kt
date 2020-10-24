@@ -8,79 +8,70 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import androidx.fragment.app.DialogFragment
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.appbar.MaterialToolbar
+import com.teyyub.listes.model.Thing
 import com.teyyub.listes.utils.hideKeyboard
-import com.teyyub.listes.utils.hostFragment
-import io.reactivex.Observable
-import io.reactivex.subjects.BehaviorSubject
-import io.reactivex.subjects.PublishSubject
-import kotlinx.android.synthetic.main.fragment_add.view.*
+import com.teyyub.listes.utils.viewModelFactory
 
-private const val TAG = "AddFragment"
-
-//DialogFragment for adding Thing to do
-class AddFragment : DialogFragment() {
-
-    //Subject in which we will pass queries of user
-    private val searchTextSubject: PublishSubject<String> = PublishSubject.create()
-
-    //Observable for exposing query subject
-    val searchStream: Observable<String>
-        get() = searchTextSubject.hide()
-
-    //Show which will emit when need to show populars list
-    private val showPopularsSubject: BehaviorSubject<Unit> = BehaviorSubject.create()
-
-    //Observable for exposing show populars subject
-    val showPopularsStream: Observable<Unit>
-        get() = showPopularsSubject.hide()
+//Activity for adding Thing to do
+class AddActivity : AppCompatActivity() {
 
     //what property of Thing object which we will add to database
     private lateinit var what: String
 
     private lateinit var toolbar: MaterialToolbar
+    private lateinit var viewPager: ViewPager2
+
+    private lateinit var viewModel: AddViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_add)
+
+        toolbar = findViewById(R.id.toolbar)
+        viewPager = findViewById(R.id.view_pager)
 
         //Retrieving values from arguments bundle
-        what = arguments?.getString(TAG) ?: ""
-    }
+        what = intent.getStringExtra(THING_WHAT) ?: ""
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_add, container, false)
+        //viewModel
+        viewModel = ViewModelProvider(
+            this,
+            viewModelFactory { AddViewModel(what) }
+        ).get(AddViewModel::class.java)
 
-        //hosting fragment
-        if (savedInstanceState == null) {
-            hostFragment(R.id.fragment_container, AddManualFragment.newInstance(what))
-        }
+        configureViewPager()
 
         //If Thing is goal there is no search
-        toolbar = view.toolbar
-        if (what == goal) {
+        if (what == Thing.THING_GOAL) {
             toolbar.findViewById<LinearLayout>(R.id.search_bar).visibility = View.GONE
             toolbar.title = getString(R.string.add_goal)
         }
 
-        return view
-    }
-
-    //style for this fragment
-    override fun getTheme(): Int {
-        return R.style.DialogTheme
-    }
-
-    override fun onStart() {
-        super.onStart()
-
         //listeners for search bar
-        if (what != goal) {
+        if (what != Thing.THING_GOAL) {
             configureSearchBarListeners()
+        }
+    }
+
+    private fun configureViewPager() {
+        //Disable swipe of viewPager
+        viewPager.isUserInputEnabled = false
+
+        viewPager.adapter = object : FragmentStateAdapter(this) {
+            override fun getItemCount() = 2
+            override fun createFragment(position: Int): Fragment {
+                return when (position) {
+                    0 -> AddManualFragment.newInstance(what)
+                    1 -> AddSearchFragment.newInstance(what)
+                    else -> throw IllegalArgumentException()
+                }
+            }
         }
     }
 
@@ -92,9 +83,9 @@ class AddFragment : DialogFragment() {
         //Back button which clears focus of editText
         findBackIcon.setOnClickListener {
             if (findEditText.isFocused) {
+                hideKeyboard()
                 findEditText.clearFocus()
                 findEditText.text.clear()
-                hideKeyboard()
             } else {
                 findEditText.requestFocus()
             }
@@ -104,7 +95,7 @@ class AddFragment : DialogFragment() {
         clearIcon.setOnClickListener {
             findEditText.text.clear()
             //show populars
-            showPopularsSubject.onNext(Unit)
+            viewModel.showPopulars()
         }
 
         //changing icon and replacing fragment
@@ -112,12 +103,11 @@ class AddFragment : DialogFragment() {
         findEditText.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 findBackIcon.setImageResource(R.drawable.ic_back)
-                //open list
-                hostFragment(R.id.fragment_container, AddSearchFragment.newInstance(what))
-                showPopularsSubject.onNext(Unit)
+                swipeToAddSearchFragment()
+                viewModel.showPopulars()
             } else {
                 findBackIcon.setImageResource(R.drawable.ic_search)
-                hostFragment(R.id.fragment_container, AddManualFragment.newInstance(what))
+                swipeToAddManualFragment()
             }
         }
 
@@ -130,7 +120,6 @@ class AddFragment : DialogFragment() {
                     clearIcon.visibility = View.VISIBLE
                 }
             }
-
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
@@ -140,22 +129,21 @@ class AddFragment : DialogFragment() {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 hideKeyboard()
                 //Doing search
-                searchTextSubject.onNext(editText.text.toString())
+                viewModel.searchFor(editText.text.toString())
             }
             true
         }
     }
 
+    private fun swipeToAddManualFragment() {
+        viewPager.currentItem = 0
+    }
+
+    private fun swipeToAddSearchFragment() {
+        viewPager.currentItem = 1
+    }
+
     companion object {
-        //Static method for creating an instance of AddFragment
-        //and putting passed arguments in fragment arguments bundle
-        fun newInstance(what: String): AddFragment {
-            val args = Bundle().apply {
-                putString(TAG, what)
-            }
-            return AddFragment().apply {
-                arguments = args
-            }
-        }
+        const val THING_WHAT = "thing what"
     }
 }

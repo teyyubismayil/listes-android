@@ -4,10 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.teyyub.listes.model.Thing
+import com.teyyub.listes.utils.viewModelFactory
 import kotlinx.android.synthetic.main.fragment_add_manual.view.*
 
 private const val TAG = "AddManualFragment"
@@ -17,7 +17,7 @@ class AddManualFragment: Fragment() {
     //what property of Thing object which we will add to database
     private lateinit var what: String
 
-    private lateinit var viewModel: AddManualViewModel
+    private lateinit var viewModel: AddViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,15 +25,11 @@ class AddManualFragment: Fragment() {
         //Retrieving values from arguments bundle
         what = arguments?.getString(TAG) ?: ""
 
-        //viewModel
+        //Used viewModel instance of parent activity
         viewModel = ViewModelProvider(
-            this,
-            object : ViewModelProvider.NewInstanceFactory() {
-                override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                    return AddManualViewModel(what) as T
-                }
-            }
-        ).get(AddManualViewModel::class.java)
+            requireActivity(),
+            viewModelFactory { AddViewModel(what) }
+        ).get(AddViewModel::class.java)
     }
 
     override fun onCreateView(
@@ -43,7 +39,7 @@ class AddManualFragment: Fragment() {
     ): View? {
         val view =  inflater.inflate(R.layout.fragment_add_manual, container, false)
 
-        if (what == goal) {
+        if (what == Thing.THING_GOAL) {
             view.add_manual_text.visibility = View.GONE
         }
 
@@ -68,14 +64,14 @@ class AddManualFragment: Fragment() {
                 view.name_text_input.error = null
                 //Adding new Thing object to database
                 viewModel.addThing(view.name_edit_text.text.toString(), view.details_edit_text.text.toString())
-                //Closing this dialog fragment
-                (parentFragment as DialogFragment).dismiss()
+                //Closing AddActivity
+                requireActivity().finish()
             }
         }
 
         view.cancel_button.setOnClickListener {
-            //Closing this dialog fragment if clicked cancel
-            (parentFragment as DialogFragment).dismiss()
+            //Closing AddActivity
+            requireActivity().finish()
         }
 
         // Clear the error if name is valid

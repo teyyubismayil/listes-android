@@ -1,8 +1,6 @@
 package com.teyyub.listes.repository
 
-import com.teyyub.listes.book
 import com.teyyub.listes.model.Thing
-import com.teyyub.listes.movie
 import com.teyyub.listes.network.BookApi
 import com.teyyub.listes.network.BookResponse
 import com.teyyub.listes.network.MovieApi
@@ -19,16 +17,16 @@ object NetworkRepository {
 
     fun find(what: String, name: String): Single<NetworkResult> {
         return when (what) {
-            movie -> findMovies(name)
-            book -> findBooks(name)
+            Thing.THING_MOVIE -> findMovies(name)
+            Thing.THING_BOOK -> findBooks(name)
             else -> throw IllegalArgumentException()
         }
     }
 
     fun getPopulars(what: String): Single<NetworkResult> {
         return when (what) {
-            movie -> popularMovies()
-            book -> popularBooks()
+            Thing.THING_MOVIE -> popularMovies()
+            Thing.THING_BOOK -> popularBooks()
             else -> throw IllegalArgumentException()
         }
     }

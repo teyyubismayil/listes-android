@@ -6,12 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.teyyub.listes.adapters.ListesRecyclerViewAdapter
 import com.teyyub.listes.model.Thing
+import com.teyyub.listes.utils.viewModelFactory
 import kotlinx.android.synthetic.main.fragment_things_list.view.*
 
 private const val WHATTAG = "thing-what"
@@ -35,6 +35,8 @@ class ThingsListFragment : Fragment() {
 
     private lateinit var addFab: FloatingActionButton
 
+    private lateinit var listener: Listener
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -45,11 +47,7 @@ class ThingsListFragment : Fragment() {
         //viewModel
         viewModel = ViewModelProvider(
             this,
-            object : ViewModelProvider.NewInstanceFactory() {
-                override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                    return ThingsListViewModel(what, isDone) as T
-                }
-            }
+            viewModelFactory { ThingsListViewModel(what, isDone) }
         ).get(ThingsListViewModel::class.java)
     }
 
@@ -94,8 +92,7 @@ class ThingsListFragment : Fragment() {
             addFab.hide()
         } else {
             addFab.setOnClickListener {
-                //Show full screen dialog for adding Thing to do
-                AddFragment.newInstance(what).show(parentFragmentManager, null)
+                listener.onAddButtonClick()
             }
         }
     }
@@ -114,6 +111,15 @@ class ThingsListFragment : Fragment() {
         })
 
         requireView().recycler_view.adapter = adapter
+    }
+
+    fun setListener(listener: Listener) {
+        this.listener = listener
+    }
+
+    //Interface which will be implemented by hosting activity
+    interface Listener {
+        fun onAddButtonClick()
     }
 
     companion object {
