@@ -20,3 +20,5 @@ RxJava2
 RxKotlin
 
 Lifecycle extensions
+
+Picasso
