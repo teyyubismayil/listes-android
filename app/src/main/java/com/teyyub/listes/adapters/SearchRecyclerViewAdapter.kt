@@ -4,13 +4,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.teyyub.listes.R
-import com.teyyub.listes.model.Thing
+import com.teyyub.listes.model.Doable
+import com.teyyub.listes.utils.setImageUrl
 
 //Adapter for recycler view
-class SearchRecyclerViewAdapter(private var thingList: List<Thing>) :
+class SearchRecyclerViewAdapter(private var doableList: List<Doable>) :
     RecyclerView.Adapter<SearchRecyclerViewAdapter.SearchRecyclerViewHolder>() {
 
     private lateinit var listener: Listener
@@ -21,11 +23,11 @@ class SearchRecyclerViewAdapter(private var thingList: List<Thing>) :
         return SearchRecyclerViewHolder(view)
     }
 
-    override fun getItemCount() = thingList.size
+    override fun getItemCount() = doableList.size
 
     override fun onBindViewHolder(holder: SearchRecyclerViewHolder, position: Int) {
         //Binding holder
-        holder.bind(thingList[position])
+        holder.bind(doableList[position])
     }
 
     fun setListener(listener: Listener) {
@@ -33,38 +35,41 @@ class SearchRecyclerViewAdapter(private var thingList: List<Thing>) :
     }
 
     interface Listener {
-        fun onAddButtonClicked(thing: Thing)
+        fun onAddButtonClicked(doable: Doable)
     }
 
     //ViewHolder for recycler view
-    inner class SearchRecyclerViewHolder(private val cardView: View) :
-        RecyclerView.ViewHolder(cardView),
-        View.OnClickListener {
+    inner class SearchRecyclerViewHolder(private val cardView: View)
+        : RecyclerView.ViewHolder(cardView), View.OnClickListener {
 
         private val name: TextView = cardView.findViewById(R.id.name)
         private val details: TextView = cardView.findViewById(R.id.details)
         private val addButton: Button = cardView.findViewById(R.id.add_button)
+        private val poster: ImageView = cardView.findViewById(R.id.poster_imageview)
 
-        //Thing object which this cardView will represent
-        private lateinit var thing: Thing
+        //Doable object which this cardView will represent
+        private lateinit var doable: Doable
 
         init {
             //Setting listener for cardView
             cardView.setOnClickListener(this)
         }
 
-        //function for binding this ViewHolder
-        fun bind(thing: Thing) {
-            this.thing = thing
+        //Function for binding this ViewHolder
+        fun bind(doable: Doable) {
+            this.doable = doable
 
-            name.text = thing.name
-            details.text = thing.details
+            name.text = doable.name
+            details.text = doable.details
 
-            //Add Thing from database when
+            //Setting poster image
+            poster.setImageUrl(doable.imageUrl)
+
+            //Add Doable to database when
             addButton.setOnClickListener {
                 it.isEnabled = false
                 (it as Button).text = cardView.resources.getString(R.string.added)
-                listener.onAddButtonClicked(thing)
+                listener.onAddButtonClicked(doable)
             }
         }
 

@@ -1,6 +1,6 @@
 package com.teyyub.listes.repository
 
-import com.teyyub.listes.model.Thing
+import com.teyyub.listes.model.Doable
 import com.teyyub.listes.network.BookApi
 import com.teyyub.listes.network.BookResponse
 import com.teyyub.listes.network.MovieApi
@@ -17,16 +17,16 @@ object NetworkRepository {
 
     fun find(what: String, name: String): Single<NetworkResult> {
         return when (what) {
-            Thing.THING_MOVIE -> findMovies(name)
-            Thing.THING_BOOK -> findBooks(name)
+            Doable.DOABLE_MOVIE -> findMovies(name)
+            Doable.DOABLE_BOOK -> findBooks(name)
             else -> throw IllegalArgumentException()
         }
     }
 
     fun getPopulars(what: String): Single<NetworkResult> {
         return when (what) {
-            Thing.THING_MOVIE -> popularMovies()
-            Thing.THING_BOOK -> popularBooks()
+            Doable.DOABLE_MOVIE -> popularMovies()
+            Doable.DOABLE_BOOK -> popularBooks()
             else -> throw IllegalArgumentException()
         }
     }
@@ -45,13 +45,13 @@ object NetworkRepository {
 
     //In these methods we map Response object to Network result
     //If response code was unsuccessful or response body is null we return NetworkResult.Failure
-    //else NetworkResult.Success with List of Things
+    //else NetworkResult.Success with List of Doables
     private fun mapMovieResponse(response: Response<MovieResponse>): NetworkResult {
         return when (response.code()) {
             in 200..300 -> {
                 val body = response.body()
                 if (body != null) {
-                    NetworkResult.Success(body.results.map { it.toThing() })
+                    NetworkResult.Success(body.results.map { it.toDoable() })
                 } else {
                     NetworkResult.Failure(NetworkError.ServerFailure)
                 }
@@ -65,7 +65,7 @@ object NetworkRepository {
             in 200..300 -> {
                 val body = response.body()
                 if (body != null) {
-                    NetworkResult.Success(body.items.map { it.volumeInfo.toThing() })
+                    NetworkResult.Success(body.items.map { it.volumeInfo.toDoable() })
                 } else {
                     NetworkResult.Failure(NetworkError.ServerFailure)
                 }
@@ -77,7 +77,7 @@ object NetworkRepository {
 
 //This sealed class used to wrap Network response
 sealed class NetworkResult {
-    class Success(val things: List<Thing>) : NetworkResult()
+    class Success(val doables: List<Doable>) : NetworkResult()
     class Failure(val error: NetworkError) : NetworkResult()
 }
 

@@ -7,7 +7,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.teyyub.listes.adapters.SearchRecyclerViewAdapter
-import com.teyyub.listes.model.Thing
+import com.teyyub.listes.model.Doable
 import com.teyyub.listes.utils.viewModelFactory
 import kotlinx.android.synthetic.main.fragment_add_search.view.*
 
@@ -15,7 +15,7 @@ private const val TAG = "SearchFragment"
 
 class AddSearchFragment : Fragment() {
 
-    //what property of Thing object which we will search for
+    //what property of Doable object which we will search for
     private lateinit var what: String
 
     private lateinit var viewModel: AddViewModel
@@ -29,7 +29,7 @@ class AddSearchFragment : Fragment() {
         //Retrieving values from arguments bundle
         what = arguments?.getString(TAG) ?: ""
 
-        //viewModel
+        //Used viewModel instance of parent activity
         viewModel = ViewModelProvider(
             requireActivity(),
             viewModelFactory { AddViewModel(what) }
@@ -55,26 +55,26 @@ class AddSearchFragment : Fragment() {
         //Showing populars list
         viewModel.popularsLiveData.observe(
             viewLifecycleOwner,
-            Observer { things ->
-                if (what == Thing.THING_MOVIE) {
+            Observer { doables ->
+                if (what == Doable.DOABLE_MOVIE) {
                     view.heading_text.text = getString(R.string.popular_movies)
                 } else {
                     view.heading_text.text = getString(R.string.popular_books)
                 }
-                updateAdapter(things)
+                updateAdapter(doables)
             }
         )
 
         //Showing result of search
         viewModel.searchedLiveData.observe(
             viewLifecycleOwner,
-            Observer { things ->
-                if (things.isEmpty()) {
+            Observer { doables ->
+                if (doables.isEmpty()) {
                     view.heading_text.text = getString(R.string.nothing_found)
                 } else {
                     view.heading_text.text = getString(R.string.results)
                 }
-                updateAdapter(things)
+                updateAdapter(doables)
             }
         )
 
@@ -106,11 +106,11 @@ class AddSearchFragment : Fragment() {
         }
     }
 
-    private fun updateAdapter(things: List<Thing>) {
-        adapter = SearchRecyclerViewAdapter(things)
+    private fun updateAdapter(doables: List<Doable>) {
+        adapter = SearchRecyclerViewAdapter(doables)
         adapter.setListener(object : SearchRecyclerViewAdapter.Listener {
-            override fun onAddButtonClicked(thing: Thing) {
-                viewModel.addThing(thing)
+            override fun onAddButtonClicked(doable: Doable) {
+                viewModel.addDoable(doable)
             }
         })
         requireView().recycler_view.adapter = adapter

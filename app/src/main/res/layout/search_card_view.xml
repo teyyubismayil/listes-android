@@ -11,45 +11,57 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="8dp">
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="top|start"
+        android:layout_gravity="start|top">
 
-        <TextView
-            android:id="@+id/name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="2dp"
-            android:text="@string/name"
-            android:textAppearance="?attr/textAppearanceHeadline6"
-            android:maxLines="1"/>
-
-        <TextView
-            android:id="@+id/details"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="2dp"
-            android:text="@string/details"
-            android:textAppearance="?attr/textAppearanceBody2"
-            android:maxLines="1"/>
+        <ImageView
+            android:id="@+id/poster_imageview"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/poster"
+            android:layout_gravity="top|start"
+            android:padding="8dp" />
 
         <LinearLayout
-            android:id="@+id/buttons_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="end"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:padding="8dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/add_button"
-                android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="?attr/colorPrimary"
-                android:text="@string/add" />
+                android:maxLines="1"
+                android:padding="2dp"
+                android:text="@string/name"
+                android:textAppearance="?attr/textAppearanceHeadline6" />
 
+            <TextView
+                android:id="@+id/details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:padding="2dp"
+                android:text="@string/details"
+                android:textAppearance="?attr/textAppearanceBody2" />
+
+            <LinearLayout
+                android:id="@+id/buttons_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/add_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="?attr/colorPrimary"
+                    android:text="@string/add" />
+            </LinearLayout>
         </LinearLayout>
-
-
     </LinearLayout>
-
 </com.google.android.material.card.MaterialCardView>

@@ -4,10 +4,12 @@ import android.app.Activity
 import android.content.Context
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.squareup.picasso.Picasso
 import com.teyyub.listes.R
 
 fun Fragment.hideKeyboard() {
@@ -41,3 +43,13 @@ inline fun <VM : ViewModel> viewModelFactory(crossinline f: () -> VM) =
     object : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(aClass: Class<T>):T = f() as T
     }
+
+fun ImageView.setImageUrl(url: String?) {
+    if(!url.isNullOrEmpty()) {
+        Picasso.get().load(url).into(this)
+    }
+}
+
+fun ImageView.setImageUrl(int: Int) {
+    this.setImageDrawable(resources.getDrawable(int,null))
+}

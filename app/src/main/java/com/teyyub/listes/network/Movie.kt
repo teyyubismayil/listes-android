@@ -1,10 +1,10 @@
 package com.teyyub.listes.network
 
-import com.teyyub.listes.model.Thing
+import com.teyyub.listes.model.Doable
 
-data class Movie(val title: String, val overview: String?, val release_date: String?){
+data class Movie(val title: String, val overview: String?, val release_date: String?, val poster_path: String?){
 
-    fun toThing(): Thing {
+    fun toDoable(): Doable {
 
         val details = if (!release_date.isNullOrEmpty()) {
             val releaseYear = release_date.substring(0, 4)
@@ -12,6 +12,9 @@ data class Movie(val title: String, val overview: String?, val release_date: Str
         } else {
             overview ?: ""
         }
-        return Thing(Thing.THING_MOVIE, title, details, false)
+
+        val imageUrl = "https://image.tmdb.org/t/p/w185/$poster_path"
+
+        return Doable(Doable.DOABLE_MOVIE, title, details, false, imageUrl)
     }
 }

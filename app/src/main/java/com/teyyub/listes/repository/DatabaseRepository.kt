@@ -3,61 +3,61 @@ package com.teyyub.listes.repository
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.room.Room
-import com.teyyub.listes.database.ThingDao
-import com.teyyub.listes.database.Thingdatabase
-import com.teyyub.listes.model.Thing
+import com.teyyub.listes.database.DoableDao
+import com.teyyub.listes.database.DoableDatabase
+import com.teyyub.listes.model.Doable
 import java.util.concurrent.Executors
 
-private const val DATABASE_NAME = "thing-database"
+private const val DATABASE_NAME = "doable-database"
 
 //Repository for working with database. It is singleton so constructor is private
 class DatabaseRepository private constructor(context: Context) {
 
-    //ThingDatabase implementation
-    private val database: Thingdatabase = Room.databaseBuilder(
+    //DoableDatabase implementation
+    private val database: DoableDatabase = Room.databaseBuilder(
         context.applicationContext,
-        Thingdatabase::class.java,
+        DoableDatabase::class.java,
         DATABASE_NAME
     ).build()
 
-    //ThingDao implementation
-    private val thingDao: ThingDao = database.thingDao()
+    //DoableDao implementation
+    private val doableDao: DoableDao = database.doableDao()
 
     //Executor for performing tasks in background
     private val executor = Executors.newSingleThreadExecutor()
 
     //functions for working with database
-    fun getThings(what: String, isDone: Boolean): LiveData<List<Thing>> =
-        thingDao.getThings(what, isDone)
+    fun getDoables(what: String, isDone: Boolean): LiveData<List<Doable>> =
+        doableDao.getDoables(what, isDone)
 
-    fun getAllThings(): LiveData<List<Thing>> = thingDao.getAllThings()
+    fun getAllDoables(): LiveData<List<Doable>> = doableDao.getAllDoables()
 
-    fun addThing(thing: Thing) {
+    fun addDoable(doable: Doable) {
         executor.execute {
-            thingDao.addThing(thing)
+            doableDao.addDoable(doable)
         }
     }
 
-    fun updateThing(thing: Thing) {
+    fun updateDoable(doable: Doable) {
         executor.execute {
-            thingDao.updateThing(thing)
+            doableDao.updateDoable(doable)
         }
     }
 
-    fun deleteThing(thing: Thing) {
+    fun deleteDoable(doable: Doable) {
         executor.execute {
-            thingDao.deleteThing(thing)
+            doableDao.deleteDoable(doable)
         }
     }
 
     fun nukeTable() {
         executor.execute {
-            thingDao.nukeTable()
+            doableDao.nukeTable()
         }
     }
 
     companion object {
-        //ThingRepository is singleton
+        //DatabaseRepository is singleton
         private var INSTANCE: DatabaseRepository? = null
 
         //it is initialized in application's onCreate() function
@@ -67,9 +67,9 @@ class DatabaseRepository private constructor(context: Context) {
             }
         }
 
-        //for getting the instance of ThingRepository
+        //for getting the instance of DatabaseRepository
         fun get(): DatabaseRepository {
-            return INSTANCE ?: throw IllegalStateException("CrimeRepository must be initialized")
+            return INSTANCE ?: throw IllegalStateException("DatabaseRepository must be initialized")
         }
     }
 }

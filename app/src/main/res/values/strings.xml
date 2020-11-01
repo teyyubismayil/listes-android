@@ -30,6 +30,7 @@
     <string name="nothing_found">Nothing found</string>
     <string name="results">Results</string>
     <string name="something_went_wrong">Something went wrong</string>
+    <string name="poster">poster</string>
 
     <string-array name="achieve">
         <item>To achieve</item>

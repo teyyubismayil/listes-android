@@ -3,15 +3,17 @@ package com.teyyub.listes.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.teyyub.listes.R
-import com.teyyub.listes.model.Thing
+import com.teyyub.listes.model.Doable
+import com.teyyub.listes.utils.setImageUrl
 
 //Adapter for recycler view
-class ListesRecyclerViewAdapter(private var thingList: List<Thing>) :
+class ListesRecyclerViewAdapter(private var doableList: List<Doable>) :
     RecyclerView.Adapter<ListesRecyclerViewAdapter.ListesRecyclerViewHolder>() {
 
     private lateinit var listener: Listener
@@ -22,11 +24,11 @@ class ListesRecyclerViewAdapter(private var thingList: List<Thing>) :
         return ListesRecyclerViewHolder(view)
     }
 
-    override fun getItemCount() = thingList.size
+    override fun getItemCount() = doableList.size
 
     override fun onBindViewHolder(holder: ListesRecyclerViewHolder, position: Int) {
         //Binding holder
-        holder.bind(thingList[position])
+        holder.bind(doableList[position])
     }
 
     fun setListener(listener: Listener) {
@@ -35,34 +37,37 @@ class ListesRecyclerViewAdapter(private var thingList: List<Thing>) :
 
     //Listener for clicks which Activity or Fragment will implement
     interface Listener {
-        fun onDidButtonClick(thing: Thing)
-        fun onDeleteButtonClick(thing: Thing)
+        fun onDidButtonClick(doable: Doable)
+        fun onDeleteButtonClick(doable: Doable)
     }
 
     //ViewHolder for recycler view
-    inner class ListesRecyclerViewHolder(private val cardView: View) :
-        RecyclerView.ViewHolder(cardView),
-        View.OnClickListener {
+    inner class ListesRecyclerViewHolder(private val cardView: View)
+        : RecyclerView.ViewHolder(cardView), View.OnClickListener {
 
         private val name: TextView = cardView.findViewById(R.id.name)
         private val details: TextView = cardView.findViewById(R.id.details)
         private val buttonLayout: LinearLayout = cardView.findViewById(R.id.buttons_layout)
         private val deleteButton: MaterialButton = cardView.findViewById(R.id.delete_button)
+        private val poster: ImageView = cardView.findViewById(R.id.poster_imageview)
 
-        //Button which user presses when user done this thing
+        //Button which user presses when user done this doable
         private val didButton: MaterialButton = cardView.findViewById(R.id.did_button)
 
-        //Thing object which this cardView will represent
-        private lateinit var thing: Thing
+        //Doable object which this cardView will represent
+        private lateinit var doable: Doable
 
         init {
             //Setting listener for cardView
             cardView.setOnClickListener(this)
         }
 
-        //function for binding this ViewHolder
-        fun bind(thing: Thing) {
-            this.thing = thing
+        //Function for binding this ViewHolder
+        fun bind(doable: Doable) {
+            this.doable = doable
+
+            //Setting poster image
+            poster.setImageUrl(doable.imageUrl)
 
             configureTextViews()
             configureDidButton()
@@ -70,43 +75,43 @@ class ListesRecyclerViewAdapter(private var thingList: List<Thing>) :
         }
 
         private fun configureTextViews() {
-            name.text = thing.name
+            name.text = doable.name
 
-            if (thing.details.isEmpty()) {
+            if (doable.details.isEmpty()) {
                 details.visibility = View.GONE
             } else {
-                details.text = thing.details
+                details.text = doable.details
             }
         }
 
         private fun configureDidButton() {
-            if (this.thing.isDone) {
-                //Hiding didButton if this thing is done(isDone is true)
+            if (this.doable.isDone) {
+                //Hiding didButton if this doable is done(isDone is true)
                 didButton.visibility = View.GONE
             } else {
                 //Setting text for didButton text
-                //depending on what value of thing object
+                //depending on 'what' value of doable object
                 didButton.text = cardView.resources.getString(
-                    when (thing.what) {
-                        Thing.THING_GOAL -> R.string.achieved
-                        Thing.THING_BOOK -> R.string.readed
-                        Thing.THING_MOVIE -> R.string.watched
+                    when (doable.what) {
+                        Doable.DOABLE_GOAL -> R.string.achieved
+                        Doable.DOABLE_BOOK -> R.string.readed
+                        Doable.DOABLE_MOVIE -> R.string.watched
                         else -> R.string.something
                     }
                 )
-                //Update this thing in database with isDone property true
+                //Update this doable in database with isDone property true
                 //if user clicked didButton
                 didButton.setOnClickListener {
-                    listener.onDidButtonClick(thing)
+                    listener.onDidButtonClick(doable)
                 }
             }
         }
 
         private fun configureDeleteButton() {
-            //Delete Thing from database when
+            //Delete doable from database when
             //deleteButton is pressed
             deleteButton.setOnClickListener {
-                listener.onDeleteButtonClick(thing)
+                listener.onDeleteButtonClick(doable)
             }
         }
 

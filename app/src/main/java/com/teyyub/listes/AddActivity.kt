@@ -14,14 +14,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.appbar.MaterialToolbar
-import com.teyyub.listes.model.Thing
+import com.teyyub.listes.model.Doable
 import com.teyyub.listes.utils.hideKeyboard
 import com.teyyub.listes.utils.viewModelFactory
 
-//Activity for adding Thing to do
+//Activity for adding Doable to do
 class AddActivity : AppCompatActivity() {
 
-    //what property of Thing object which we will add to database
+    //what property of Doable object which we will add to database
     private lateinit var what: String
 
     private lateinit var toolbar: MaterialToolbar
@@ -37,7 +37,7 @@ class AddActivity : AppCompatActivity() {
         viewPager = findViewById(R.id.view_pager)
 
         //Retrieving values from arguments bundle
-        what = intent.getStringExtra(THING_WHAT) ?: ""
+        what = intent.getStringExtra(DOABLE_WHAT) ?: ""
 
         //viewModel
         viewModel = ViewModelProvider(
@@ -47,14 +47,14 @@ class AddActivity : AppCompatActivity() {
 
         configureViewPager()
 
-        //If Thing is goal there is no search
-        if (what == Thing.THING_GOAL) {
+        //If Doable is goal there is no search
+        if (what == Doable.DOABLE_GOAL) {
             toolbar.findViewById<LinearLayout>(R.id.search_bar).visibility = View.GONE
             toolbar.title = getString(R.string.add_goal)
         }
 
         //listeners for search bar
-        if (what != Thing.THING_GOAL) {
+        if (what != Doable.DOABLE_GOAL) {
             configureSearchBarListeners()
         }
     }
@@ -144,6 +144,6 @@ class AddActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val THING_WHAT = "thing what"
+        const val DOABLE_WHAT = "doable what"
     }
 }

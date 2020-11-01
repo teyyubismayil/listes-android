@@ -10,28 +10,28 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.teyyub.listes.adapters.ListesRecyclerViewAdapter
-import com.teyyub.listes.model.Thing
+import com.teyyub.listes.model.Doable
 import com.teyyub.listes.utils.viewModelFactory
-import kotlinx.android.synthetic.main.fragment_things_list.view.*
+import kotlinx.android.synthetic.main.fragment_doables_list.view.*
 
-private const val WHATTAG = "thing-what"
-private const val ISDONETAG = "thing-isdone"
+private const val WHATTAG = "doable-what"
+private const val ISDONETAG = "doable-isdone"
 
-//Fragment which shows list of things
-class ThingsListFragment : Fragment() {
+//Fragment which shows list of doables
+class DoablesListFragment : Fragment() {
 
     //Adapter for recyclerView
-    //First we pass emptyList until we get list of Things from LiveData
+    //First we pass emptyList until we get list of Doables from LiveData
     private var adapter: ListesRecyclerViewAdapter =
         ListesRecyclerViewAdapter(emptyList())
 
-    //what and isDone properties of Thing objects to show
+    //what and isDone properties of Doable objects to show
     //They are passed to newInstance(..) function
     // and stored in fragment's arguments bundle
     private lateinit var what: String
     private var isDone: Boolean = false
 
-    private lateinit var viewModel: ThingsListViewModel
+    private lateinit var viewModel: DoablesListViewModel
 
     private lateinit var addFab: FloatingActionButton
 
@@ -47,8 +47,8 @@ class ThingsListFragment : Fragment() {
         //viewModel
         viewModel = ViewModelProvider(
             this,
-            viewModelFactory { ThingsListViewModel(what, isDone) }
-        ).get(ThingsListViewModel::class.java)
+            viewModelFactory { DoablesListViewModel(what, isDone) }
+        ).get(DoablesListViewModel::class.java)
     }
 
     override fun onCreateView(
@@ -56,7 +56,7 @@ class ThingsListFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_things_list, container, false)
+        val view = inflater.inflate(R.layout.fragment_doables_list, container, false)
 
         addFab = view.add_fab
         configureAddFab()
@@ -70,16 +70,16 @@ class ThingsListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //Getting list of Thing objects from database
+        //Getting list of Doable objects from database
         //We scope lifetime of Observer to lifetime
         // of lifecycle of fragment view
-        viewModel.thingsLiveData.observe(
+        viewModel.doablesLiveData.observe(
             viewLifecycleOwner,
-            Observer { things ->
-                things?.let {
-                    //We update adapter to show Things
+            Observer { doables ->
+                doables?.let {
+                    //We update adapter to show Doables
                     // which we got from database
-                    updateAdapter(things)
+                    updateAdapter(doables)
                 }
             }
         )
@@ -87,7 +87,7 @@ class ThingsListFragment : Fragment() {
 
     private fun configureAddFab() {
         //We show floatButton if this fragment shows list
-        // of things to do(isDone is false)
+        // of doables to do(isDone is false)
         if (isDone) {
             addFab.hide()
         } else {
@@ -97,15 +97,15 @@ class ThingsListFragment : Fragment() {
         }
     }
 
-    private fun updateAdapter(list: List<Thing>) {
+    private fun updateAdapter(list: List<Doable>) {
         adapter = ListesRecyclerViewAdapter(list)
 
         adapter.setListener(object : ListesRecyclerViewAdapter.Listener{
-            override fun onDidButtonClick(thing: Thing) {
-                viewModel.didThing(thing)
+            override fun onDidButtonClick(doable: Doable) {
+                viewModel.didDoable(doable)
             }
-            override fun onDeleteButtonClick(thing: Thing) {
-                viewModel.deleteThing(thing)
+            override fun onDeleteButtonClick(doable: Doable) {
+                viewModel.deleteDoable(doable)
             }
 
         })
@@ -123,15 +123,15 @@ class ThingsListFragment : Fragment() {
     }
 
     companion object {
-        //Static method for creating an instance of ThingsListFragment
+        //Static method for creating an instance of DoablesListFragment
         //and putting passed arguments in fragment arguments bundle
-        fun newInstance(what: String, isDone: Boolean): ThingsListFragment {
+        fun newInstance(what: String, isDone: Boolean): DoablesListFragment {
             val args = Bundle().apply {
                 putString(WHATTAG, what)
                 putBoolean(ISDONETAG, isDone)
             }
 
-            return ThingsListFragment().apply {
+            return DoablesListFragment().apply {
                 arguments = args
             }
         }

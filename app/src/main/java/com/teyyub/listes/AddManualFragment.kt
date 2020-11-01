@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.teyyub.listes.model.Thing
+import com.teyyub.listes.model.Doable
 import com.teyyub.listes.utils.viewModelFactory
 import kotlinx.android.synthetic.main.fragment_add_manual.view.*
 
@@ -14,7 +14,7 @@ private const val TAG = "AddManualFragment"
 
 class AddManualFragment: Fragment() {
 
-    //what property of Thing object which we will add to database
+    //what property of Doable object which we will add to database
     private lateinit var what: String
 
     private lateinit var viewModel: AddViewModel
@@ -39,7 +39,7 @@ class AddManualFragment: Fragment() {
     ): View? {
         val view =  inflater.inflate(R.layout.fragment_add_manual, container, false)
 
-        if (what == Thing.THING_GOAL) {
+        if (what == Doable.DOABLE_GOAL) {
             view.add_manual_text.visibility = View.GONE
         }
 
@@ -62,8 +62,8 @@ class AddManualFragment: Fragment() {
             } else {
                 //Clear the error
                 view.name_text_input.error = null
-                //Adding new Thing object to database
-                viewModel.addThing(view.name_edit_text.text.toString(), view.details_edit_text.text.toString())
+                //Adding new Doable object to database
+                viewModel.addDoable(view.name_edit_text.text.toString(), view.details_edit_text.text.toString())
                 //Closing AddActivity
                 requireActivity().finish()
             }

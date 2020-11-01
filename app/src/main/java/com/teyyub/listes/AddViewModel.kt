@@ -4,7 +4,7 @@ import android.text.Editable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.teyyub.listes.model.Thing
+import com.teyyub.listes.model.Doable
 import com.teyyub.listes.repository.DatabaseRepository
 import com.teyyub.listes.repository.NetworkRepository
 import com.teyyub.listes.repository.NetworkResult
@@ -19,10 +19,10 @@ class AddViewModel(val what: String): ViewModel() {
     private val disposables = CompositeDisposable()
 
     //LiveData to which we post populars result
-    private val _popularsLiveData: MutableLiveData<List<Thing>> = MutableLiveData()
+    private val _popularsLiveData: MutableLiveData<List<Doable>> = MutableLiveData()
 
     //LiveData to which we post search result
-    private val _searchedLiveData: MutableLiveData<List<Thing>> = MutableLiveData()
+    private val _searchedLiveData: MutableLiveData<List<Doable>> = MutableLiveData()
 
     //LiveData to which we post value if something went wrong
     private val _errorLiveData: MutableLiveData<Unit> = MutableLiveData()
@@ -32,9 +32,9 @@ class AddViewModel(val what: String): ViewModel() {
     private val _loadingLiveData: MutableLiveData<Boolean> = MutableLiveData()
 
     //We expose to fragment LiveData, not MutableLiveData
-    val popularsLiveData: LiveData<List<Thing>>
+    val popularsLiveData: LiveData<List<Doable>>
         get() = _popularsLiveData
-    val searchedLiveData: LiveData<List<Thing>>
+    val searchedLiveData: LiveData<List<Doable>>
         get() = _searchedLiveData
     val errorLiveData: LiveData<Unit>
         get() = _errorLiveData
@@ -52,7 +52,7 @@ class AddViewModel(val what: String): ViewModel() {
                 .doOnSuccess {
                     //Saving in cache
                     if (it is NetworkResult.Success) {
-                        popularsCache[what] = it.things
+                        popularsCache[what] = it.doables
                     } else {
                         _errorLiveData.postValue(Unit)
                     }
@@ -61,7 +61,7 @@ class AddViewModel(val what: String): ViewModel() {
                     it is NetworkResult.Success
                 }
                 .map {
-                    (it as NetworkResult.Success).things
+                    (it as NetworkResult.Success).doables
                 }
                 .subscribeOn(Schedulers.io())
                 .subscribeBy(
@@ -91,7 +91,7 @@ class AddViewModel(val what: String): ViewModel() {
                 it is NetworkResult.Success
             }
             .map {
-                (it as NetworkResult.Success).things
+                (it as NetworkResult.Success).doables
             }
             .subscribeOn(Schedulers.io())
             .subscribeBy(
@@ -110,14 +110,14 @@ class AddViewModel(val what: String): ViewModel() {
         return text != null && text.isNotEmpty()
     }
 
-    //Adding new Thing object to database
-    fun addThing(name: String, details: String) {
-        val newThing = Thing(what, name, details, false)
-        DatabaseRepository.get().addThing(newThing)
+    //Adding new Doaable object to database
+    fun addDoable(name: String, details: String) {
+        val newDoable = Doable(what, name, details, false, "")
+        DatabaseRepository.get().addDoable(newDoable)
     }
 
-    fun addThing(thing: Thing) {
-        DatabaseRepository.get().addThing(thing)
+    fun addDoable(doable: Doable) {
+        DatabaseRepository.get().addDoable(doable)
     }
 
     override fun onCleared() {
@@ -129,9 +129,9 @@ class AddViewModel(val what: String): ViewModel() {
     companion object {
         //Here we will cache populars result to use during app lifecycle
         //So we will fetch popular books and popular movies once during app lifecycle
-        private val popularsCache = mutableMapOf<String, List<Thing>>(
-            Pair(Thing.THING_MOVIE, emptyList()),
-            Pair(Thing.THING_BOOK, emptyList())
+        private val popularsCache = mutableMapOf<String, List<Doable>>(
+            Pair(Doable.DOABLE_MOVIE, emptyList()),
+            Pair(Doable.DOABLE_BOOK, emptyList())
         )
     }
 }
